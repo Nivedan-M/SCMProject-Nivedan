@@ -108,7 +108,105 @@
     pointer-events: none;
     transition: opacity 0.6s ease;
   }
+/* Pavan */
+  #gameOverOverlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+  #gameOverOverlay button {
+    margin-top: 1.5rem;
+    font-size: 1.2rem;
+    padding: 0.6em 1.2em;
+    background: #ffeb3b;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    color: #222;
+    box-shadow: 0 0 12px #fbc02d;
+    transition: background 0.3s ease;
+  }
+  #gameOverOverlay button:hover {
+    background: #fbc02d;
+  }
+  @media (max-width: 520px) {
+    #game {
+      grid-template-columns: repeat(8, 40px);
+      grid-template-rows: repeat(8, 40px);
+      gap: 3px;
+      padding: 6px;
+    }
+    .candy {
+      width: 40px;
+      height: 40px;
+      font-size: 1.1rem;
+    }
+  }
+</style>
+</head>
+<body>
+  <h1>Candy Crush Lite - Nivedan</h1>
+  <div id="status-container">
+    <div id="score" aria-live="polite" aria-atomic="true">Score: 0</div>
+    <div id="moves" aria-live="polite" aria-atomic="true">Moves left: 20</div>
+    <div id="timer" aria-live="polite" aria-atomic="true">Time left: 01:30</div>
+  </div>
+  <div id="game" aria-label="Candy crush game board" role="grid"></div>
+  <div id="instructions" aria-live="polite">
+    Click on a candy, then click an adjacent candy to swap.<br />
+    Match 3 or more to clear them and score points!<br />
+    You have 20 moves and 90 seconds. Try to get the highest score!
+  </div>
+  <div id="gameOverOverlay" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle" tabindex="-1">
+    <div id="gameOverTitle">Game Over!</div>
+    <div id="finalScore" style="margin-top: 1rem; font-size: 1.8rem;"></div>
+    <button id="restartBtn" aria-label="Restart game">Restart</button>
+  </div>
+<script>
+(() => {
+  const width = 8;
+  const candies = ['red', 'green', 'blue', 'yellow', 'purple', 'orange'];
+  let board = [];
+  let selected = null;
+  let score = 0;
+  let movesLeft = 20;
+  const maxMoves = 20;
+  let timerSeconds = 90;
+  let canPlay = true;
+  let timerInterval = null;
 
+  const game = document.getElementById('game');
+  const scoreDisplay = document.getElementById('score');
+  const movesDisplay = document.getElementById('moves');
+  const timerDisplay = document.getElementById('timer');
+  const gameOverOverlay = document.getElementById('gameOverOverlay');
+  const finalScoreDisplay = document.getElementById('finalScore');
+  const restartBtn = document.getElementById('restartBtn');
+
+  function createBoard() {
+    board = [];
+    game.innerHTML = '';
+    for(let i=0; i < width * width; i++){
+      const candy = randomCandy();
+      board.push(candy);
+      const candyDiv = createCandyDiv(candy, i);
+      game.appendChild(candyDiv);
+    }
+  }
+
+  function randomCandy(){
+    return candies[Math.floor(Math.random() * candies.length)];
+  }
+
+  function createCandyDiv(color, index){
+    const candyDiv = document.createElement('div');
+    candyDiv.classList.add('candy', color);
+    candyDiv.dataset.index = index;
+    candyDiv.setAttribute('role', 'gridcell');
+    candyDiv.setAttribute('aria-label', color + ' candy');
+    candyDiv.addEventListener('click', candyClick);
+    return candyDiv;
+  }
   //adding pre code
 // Anjan
   function candyClick(e){

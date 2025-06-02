@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Enhanced Candy Crush Lite</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
   body {
     margin: 0;
     background: #1e1e2f;
@@ -80,7 +80,7 @@
     0%, 100% { box-shadow: 0 0 20px 5px #ffee58 inset; }
     50% { box-shadow: 0 0 30px 10px #ffd54f inset; }
   }
-#instructions {
+  #instructions {
     margin-top: 1rem;
     max-width: 360px;
     text-align: center;
@@ -107,8 +107,105 @@
     pointer-events: none;
     transition: opacity 0.6s ease;
   }
+  /* Pavan */
+  #gameOverOverlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+  #gameOverOverlay button {
+    margin-top: 1.5rem;
+    font-size: 1.2rem;
+    padding: 0.6em 1.2em;
+    background: #ffeb3b;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    color: #222;
+    box-shadow: 0 0 12px #fbc02d;
+    transition: background 0.3s ease;
+  }
+  #gameOverOverlay button:hover {
+    background: #fbc02d;
+  }
+  @media (max-width: 520px) {
+    #game {
+      grid-template-columns: repeat(8, 40px);
+      grid-template-rows: repeat(8, 40px);
+      gap: 3px;
+      padding: 6px;
+    }
+    .candy {
+      width: 40px;
+      height: 40px;
+      font-size: 1.1rem;
+    }
+  }
+</style>
+</head>
+<body>
+  <h1>Candy Crush Lite - Nivedan</h1>
+  <div id="status-container">
+    <div id="score" aria-live="polite" aria-atomic="true">Score: 0</div>
+    <div id="moves" aria-live="polite" aria-atomic="true">Moves left: 20</div>
+    <div id="timer" aria-live="polite" aria-atomic="true">Time left: 01:30</div>
+  </div>
+  <div id="game" aria-label="Candy crush game board" role="grid"></div>
+  <div id="instructions" aria-live="polite">
+    Click on a candy, then click an adjacent candy to swap.<br />
+    Match 3 or more to clear them and score points!<br />
+    You have 20 moves and 90 seconds. Try to get the highest score!
+  </div>
+  <div id="gameOverOverlay" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle" tabindex="-1">
+    <div id="gameOverTitle">Game Over!</div>
+    <div id="finalScore" style="margin-top: 1rem; font-size: 1.8rem;"></div>
+    <button id="restartBtn" aria-label="Restart game">Restart</button>
+  </div>
+<script>
+(() => {
+  const width = 8;
+  const candies = ['red', 'green', 'blue', 'yellow', 'purple', 'orange'];
+  let board = [];
+  let selected = null;
+  let score = 0;
+  let movesLeft = 20;
+  const maxMoves = 20;
+  let timerSeconds = 90;
+  let canPlay = true;
+  let timerInterval = null;
 
-  //adding pre code
+  const game = document.getElementById('game');
+  const scoreDisplay = document.getElementById('score');
+  const movesDisplay = document.getElementById('moves');
+  const timerDisplay = document.getElementById('timer');
+  const gameOverOverlay = document.getElementById('gameOverOverlay');
+  const finalScoreDisplay = document.getElementById('finalScore');
+  const restartBtn = document.getElementById('restartBtn');
+
+  function createBoard() {
+    board = [];
+    game.innerHTML = '';
+    for(let i=0; i < width * width; i++){
+      const candy = randomCandy();
+      board.push(candy);
+      const candyDiv = createCandyDiv(candy, i);
+      game.appendChild(candyDiv);
+    }
+  }
+
+  function randomCandy(){
+    return candies[Math.floor(Math.random() * candies.length)];
+  }
+
+  function createCandyDiv(color, index){
+    const candyDiv = document.createElement('div');
+    candyDiv.classList.add('candy', color);
+    candyDiv.dataset.index = index;
+    candyDiv.setAttribute('role', 'gridcell');
+    candyDiv.setAttribute('aria-label', color + ' candy');
+    candyDiv.addEventListener('click', candyClick);
+    return candyDiv;
+  }
 // Anjan
   function candyClick(e){
     if (!canPlay) return;
@@ -213,8 +310,206 @@
     // Animate swap
     div1.style.transition = 'transform 0.3s ease';
     div2.style.transition = 'transform 0.3s ease';
-</style>
-</head>
-<body>
+// Nikhil
+    div1.style.transform = `translate(${dx}px, ${dy}px)`;
+    div2.style.transform = `translate(${-dx}px, ${-dy}px)`;
+
+    let done = 0;
+    function onTransitionEnd(){
+      done++;
+      if(done === 2){
+        // Reset styles
+        div1.style.transition = '';
+        div2.style.transition = '';
+        div1.style.transform = '';
+        div2.style.transform = '';
+        div1.removeEventListener('transitionend', onTransitionEnd);
+        div2.removeEventListener('transitionend', onTransitionEnd);
+        callback();
+      }
+    }
+    div1.addEventListener('transitionend', onTransitionEnd);
+    div2.addEventListener('transitionend', onTransitionEnd);
+  }
+
+  function checkAllMatches(){
+    return (findMatches().length > 0);
+  }
+
+  function findMatches(){
+    const matches = new Set();
+
+    // Horizontal matches
+    for(let r=0; r < width; r++){
+      for(let c=0; c < width - 2; c++){
+        const idx = r * width + c;
+        const color = board[idx];
+        if(color && color === board[idx + 1] && color === board[idx + 2]){
+          matches.add(idx); matches.add(idx + 1); matches.add(idx + 2);
+          let k = idx + 3;
+          while(k < r * width + width && board[k] === color){
+            matches.add(k);
+            k++;
+          }
+        }
+      }
+    }
+
+    // Vertical matches
+    for(let c=0; c < width; c++){
+      for(let r=0; r < width - 2; r++){
+        const idx = r * width + c;
+        const color = board[idx];
+        if(color && color === board[idx + width] && color === board[idx + 2 * width]){
+          matches.add(idx); matches.add(idx + width); matches.add(idx + 2 * width);
+          let k = idx + 3 * width;
+          while(k < width * width && board[k] === color){
+            matches.add(k);
+            k += width;
+          }
+        }
+      }
+    }
+    return Array.from(matches).sort((a,b) => a - b);
+  }
+
+  function processMatches(callback){
+    const matches = findMatches();
+    if(matches.length === 0){
+      if(callback) callback();
+      return;
+    }
+
+    // Highlight matches before removal
+    highlightMatches(matches);
+
+    // Increase score
+    score += matches.length * 10;
+    updateScore();
+
+    // Remove candies after highlight animation
+    setTimeout(() => {
+      matches.forEach(idx => {
+        board[idx] = null;
+      });
+      dropCandies();
+      fillEmpty();
+      updateBoard();
+
+      setTimeout(() => {
+        processMatches(callback);
+      }, 300);
+    }, 700);
+  }
+
+  function highlightMatches(matches){
+    matches.forEach(idx => {
+      const candyDiv = game.children[idx];
+      candyDiv.classList.add('match-highlight');
+      candyDiv.addEventListener('animationend', () => {
+        candyDiv.classList.remove('match-highlight');
+      }, {once:true});
+    });
+  }
+// Pruthvi
+  function dropCandies(){
+    for(let c=0; c < width; c++){
+      for(let r=width-1; r >= 0; r--){
+        if(board[r * width + c] === null){
+          let nr = r - 1;
+          while(nr >= 0 && board[nr * width + c] === null){
+            nr--;
+          }
+          if(nr >= 0){
+            board[r * width + c] = board[nr * width + c];
+            board[nr * width + c] = null;
+          }
+        }
+      }
+    }
+  }
+
+  function fillEmpty(){
+    for(let i=0; i < width * width; i++){
+      if(board[i] === null){
+        board[i] = randomCandy();
+      }
+    }
+  }
+
+  function updateBoard(){
+    for(let i=0; i < width * width; i++){
+      const candyDiv = game.children[i];
+      candyDiv.className = 'candy ' + board[i];
+    }
+  }
+
+  function updateScore(){
+    scoreDisplay.textContent = 'Score: ' + score;
+  }
+  function updateMoves(){
+    movesDisplay.textContent = 'Moves left: ' + movesLeft;
+  }
+  function updateTimer(){
+    let m = Math.floor(timerSeconds / 60);
+    let s = timerSeconds % 60;
+    timerDisplay.textContent = `Time left: ${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+  }
+
+  function startTimer(){
+    timerInterval = setInterval(() => {
+      timerSeconds--;
+      updateTimer();
+      if(timerSeconds <= 0){
+        clearInterval(timerInterval);
+        endGame();
+      }
+    }, 1000);
+  }
+
+  function endGame(){
+    canPlay = false;
+    clearInterval(timerInterval);
+    finalScoreDisplay.textContent = 'Your final score: ' + score;
+    gameOverOverlay.classList.add('active');
+  }
+
+  function restartGame(){
+    score = 0;
+    movesLeft = maxMoves;
+    timerSeconds = 90;
+    canPlay = true;
+    selected = null;
+    updateScore();
+    updateMoves();
+    updateTimer();
+    createBoard();
+    clearInitialMatches();
+    gameOverOverlay.classList.remove('active');
+    startTimer();
+  }
+
+  // Clear initial matches so starting board is stable:
+  function clearInitialMatches(){
+    while(checkAllMatches()) {
+      const matches = findMatches();
+      matches.forEach(idx => board[idx] = randomCandy());
+    }
+    updateBoard();
+  }
+
+  restartBtn.addEventListener('click', () => {
+    restartGame();
+  });
+
+  // Init
+  createBoard();
+  clearInitialMatches();
+  updateScore();
+  updateMoves();
+  updateTimer();
+  startTimer();
+})();
+</script>
 </body>
 </html>

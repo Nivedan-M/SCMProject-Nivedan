@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Enhanced Candy Crush Lite</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
+  body {
+    margin: 0;
+    background: #1e1e2f;
+    font-family: 'Poppins', sans-serif;
+    color: #f0f0f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    user-select: none;
+  }
+  h1 {
+    margin-top: 1rem;
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+    font-size: 2.5rem;
+    text-shadow: 2px 2px 5px #5b5b8a;
+  }
+  #status-container {
+    display: flex;
+    gap: 2rem;
+    font-size: 1.3rem;
+    margin-bottom: 0.8rem;
+    text-shadow: 1px 1px 4px #444477;
+  }
+  #score, #timer, #moves {
+    user-select: none;
+  }
+  #game {
+    display: grid;
+    grid-template-columns: repeat(8, 60px);
+    grid-template-rows: repeat(8, 60px);
+    gap: 5px;
+    background: #2a2a45;
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px #101025a1 inset;
+  }
+  .candy {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 3px 6px #0009, inset 0 0 6px #fff4;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: rgba(255 255 255 / 0);
+    user-select: none;
+  }
+  .candy.red { background: #e53935; box-shadow: 0 0 10px #f44336, inset 0 0 6px #ff7961;}
+  .candy.green { background: #43a047; box-shadow: 0 0 10px #4caf50, inset 0 0 6px #a5d6a7;}
+  .candy.blue { background: #1e88e5; box-shadow: 0 0 10px #2196f3, inset 0 0 6px #90caf9;}
+  .candy.yellow { background: #fbc02d; box-shadow: 0 0 10px #ffeb3b, inset 0 0 6px #fff59d;}
+  .candy.purple { background: #8e24aa; box-shadow: 0 0 10px #9c27b0, inset 0 0 6px #ce93d8;}
+  .candy.orange { background: #fb8c00; box-shadow: 0 0 10px #ff9800, inset 0 0 6px #ffcc80;}
+  .selected {
+    transform: scale(1.25);
+    box-shadow:
+      0 0 22px 5px #ffeb3b,
+      0 0 18px 8px #fbc02d;
+    z-index: 10;
+  }
+  .match-highlight {
+    animation: highlightPulse 0.6s ease-in-out 2;
+    box-shadow: 0 0 20px 5px #ffee58 inset!important;
+  }
+  @keyframes highlightPulse {
+    0%, 100% { box-shadow: 0 0 20px 5px #ffee58 inset; }
+    50% { box-shadow: 0 0 30px 10px #ffd54f inset; }
+  }
+#instructions {
+    margin-top: 1rem;
+    max-width: 360px;
+    text-align: center;
+    font-size: 1rem;
+    color: #bbb;
+    line-height: 1.4;
+    text-shadow: 1px 1px 2px #222;
+  }
+  #gameOverOverlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(30, 30, 47, 0.85);
+    backdrop-filter: blur(4px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.6rem;
+    color: #ffeb3b;
+    font-weight: 700;
+    text-shadow: 0 0 10px #fbc02d;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+  }
+</style>
+</head>
+<body>
+</body>
+</html>

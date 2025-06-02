@@ -1,0 +1,102 @@
+// Pruthvi
+  function dropCandies(){
+    for(let c=0; c < width; c++){
+      for(let r=width-1; r >= 0; r--){
+        if(board[r * width + c] === null){
+          let nr = r - 1;
+          while(nr >= 0 && board[nr * width + c] === null){
+            nr--;
+          }
+          if(nr >= 0){
+            board[r * width + c] = board[nr * width + c];
+            board[nr * width + c] = null;
+          }
+        }
+      }
+    }
+  }
+
+  function fillEmpty(){
+    for(let i=0; i < width * width; i++){
+      if(board[i] === null){
+        board[i] = randomCandy();
+      }
+    }
+  }
+
+  function updateBoard(){
+    for(let i=0; i < width * width; i++){
+      const candyDiv = game.children[i];
+      candyDiv.className = 'candy ' + board[i];
+    }
+  }
+
+  function updateScore(){
+    scoreDisplay.textContent = 'Score: ' + score;
+  }
+  function updateMoves(){
+    movesDisplay.textContent = 'Moves left: ' + movesLeft;
+  }
+  function updateTimer(){
+    let m = Math.floor(timerSeconds / 60);
+    let s = timerSeconds % 60;
+    timerDisplay.textContent = `Time left: ${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+  }
+
+  function startTimer(){
+    timerInterval = setInterval(() => {
+      timerSeconds--;
+      updateTimer();
+      if(timerSeconds <= 0){
+        clearInterval(timerInterval);
+        endGame();
+      }
+    }, 1000);
+  }
+
+  function endGame(){
+    canPlay = false;
+    clearInterval(timerInterval);
+    finalScoreDisplay.textContent = 'Your final score: ' + score;
+    gameOverOverlay.classList.add('active');
+  }
+
+  function restartGame(){
+    score = 0;
+    movesLeft = maxMoves;
+    timerSeconds = 90;
+    canPlay = true;
+    selected = null;
+    updateScore();
+    updateMoves();
+    updateTimer();
+    createBoard();
+    clearInitialMatches();
+    gameOverOverlay.classList.remove('active');
+    startTimer();
+  }
+
+  // Clear initial matches so starting board is stable:
+  function clearInitialMatches(){
+    while(checkAllMatches()) {
+      const matches = findMatches();
+      matches.forEach(idx => board[idx] = randomCandy());
+    }
+    updateBoard();
+  }
+
+  restartBtn.addEventListener('click', () => {
+    restartGame();
+  });
+
+// Init
+  createBoard();
+  clearInitialMatches();
+  updateScore();
+  updateMoves();
+  updateTimer();
+  startTimer();
+})();
+</script>
+</body>
+</html>
